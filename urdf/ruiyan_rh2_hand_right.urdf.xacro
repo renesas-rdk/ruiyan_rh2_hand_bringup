@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ruiyan_rh2_hand_right_ros2_control">
+
+  <!-- Include the hand description -->
+  <xacro:include filename="$(find ruiyan_rh2_hand_description)/urdf/ruiyan_hand_right_macro.xacro"/>
+
+  <!-- Include the ros2_control configuration -->
+  <xacro:include filename="$(find ruiyan_rh2_hand_ros2_control)/urdf/ruiyan_rh2_hand_macro.ros2_control.xacro"/>
+
+  <!-- Arguments -->
+  <xacro:arg name="use_mock_hardware" default="false"/>
+  <xacro:arg name="prefix" default=""/>
+
+  <!-- World link -->
+  <link name="world"/>
+
+  <!-- Instantiate the right hand -->
+  <xacro:ruiyan_hand_right parent="world" prefix="$(arg prefix)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:ruiyan_hand_right>
+
+  <!-- Add ros2_control configuration -->
+  <xacro:ruiyan_rh2_hand_ros2_control
+    name="ruiyan_rh2_hand"
+    use_mock_hardware="$(arg use_mock_hardware)"
+    prefix="$(arg prefix)"
+  />
+
+</robot>
