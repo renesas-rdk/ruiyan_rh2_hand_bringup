@@ -116,6 +116,7 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
             parameters=[
                 robot_description,
                 controller_config,
+                position_controller_config
             ],
             remappings=[
                 ('/controller_manager/robot_description', '/robot_description'),
@@ -146,7 +147,6 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
             arguments=[
                 'ruiyan_rh2_hand_joint_position_controller',
                 '--controller-manager', '/controller_manager',
-                '--param-file', position_controller_config,
             ],
         ),
         # Foxglove bridge for web-based visualization
