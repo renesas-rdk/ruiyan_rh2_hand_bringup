@@ -14,6 +14,12 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+# Install setup files
+install(PROGRAMS
+  setup/ruiyan_rh2_init.sh
+  DESTINATION share/${PROJECT_NAME}/setup
+)
+
 # Testing
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
