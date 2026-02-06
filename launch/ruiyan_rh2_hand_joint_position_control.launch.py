@@ -28,8 +28,11 @@ This launch file starts:
 
 Usage:
   # For physical hand:
+  # Running the setup script to configure CAN interface before launching:
+  cd ~/ros2_ws
+  ./install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/setup/ruiyan_rh2_init.sh
   ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_position_control.launch.py
-  ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_position_control.launch.py hand_side:=right
+  ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_position_control.launch.py can_interface:=<can_interface> hand_speed:=<hand_speed>
 
   # For SIMULATION/TESTING without physical hand (RECOMMENDED for testing):
   ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_position_control.launch.py use_mock_hardware:=true
@@ -38,7 +41,7 @@ Usage:
 
 Test position commands in another terminal with:
   # Full hand control:
-  ros2 topic pub -1 /ruiyan_rh2_hand_joint_position_controller/commands std_msgs/msg/Float64MultiArray "{data: [0.5, 0.8, 1.2, 0.7, 0.7, 0.7]}"
+  ros2 topic pub -1 /ruiyan_rh2_hand_joint_position_controller/commands std_msgs/msg/Float64MultiArray "{data: [0.5, 0.4, 1.2, 0.7, 0.7, 0.7]}"
 
 Or run the Python test script:
   python3 ros2_ws/install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/test/test_hand_position.py
@@ -65,6 +68,8 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
     # Get launch configurations
     use_mock_hardware_value = LaunchConfiguration('use_mock_hardware').perform(context)
     hand_side_value = LaunchConfiguration('hand_side').perform(context)
+    can_interface_value = LaunchConfiguration('can_interface').perform(context)
+    hand_speed_value = LaunchConfiguration('hand_speed').perform(context)
 
     # Get package directories
     pkg_share = get_package_share_directory('ruiyan_rh2_hand_bringup')
@@ -83,7 +88,9 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
     robot_description_raw = xacro.process_file(
         robot_description_xacro,
         mappings={
-            'use_mock_hardware': use_mock_hardware_value
+            'use_mock_hardware': use_mock_hardware_value,
+            'can_interface': can_interface_value,
+            'hand_speed': hand_speed_value,
         }
     ).toxml()
 
@@ -160,21 +167,26 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
 
 def generate_launch_description() -> LaunchDescription:
     """Generate launch description for Ruiyan RH2 Hand with joint group position control."""
-    # Declare arguments
-    use_mock_hardware_arg = DeclareLaunchArgument(
-        'use_mock_hardware',
-        default_value='false',
-        description='Use mock hardware for testing (true/false)'
-    )
-
-    hand_side_arg = DeclareLaunchArgument(
-        'hand_side',
-        default_value='left',
-        description='Which hand to control: left or right'
-    )
-
     return LaunchDescription([
-        use_mock_hardware_arg,
-        hand_side_arg,
-        OpaqueFunction(function=launch_setup)
+        DeclareLaunchArgument(
+            'use_mock_hardware',
+            default_value='false',
+            description='Use mock hardware for testing (true/false)'
+        ),
+        DeclareLaunchArgument(
+            'hand_side',
+            default_value='left',
+            description='Which hand to control: left or right'
+        ),
+        DeclareLaunchArgument(
+            'can_interface',
+            default_value='can2',
+            description='CAN interface for hand hardware communication (e.g., can0, can1, can2)'
+        ),
+        DeclareLaunchArgument(
+            'hand_speed',
+            default_value='1500',
+            description='Hand motor speed'
+        ),
+        OpaqueFunction(function=launch_setup),
     ])

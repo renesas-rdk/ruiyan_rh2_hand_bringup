@@ -32,7 +32,7 @@ class HandPositionTest(Node):
         # Test patterns
         self.get_logger().info('Starting hand position test...')
         self.test_counter = 0
-        self.timer = self.create_timer(2.0, self.run_test)
+        self.timer = self.create_timer(3.0, self.run_test)
 
     def run_test(self):
         """Run different test patterns"""
@@ -75,13 +75,13 @@ class HandPositionTest(Node):
         # All fingers closed to maximum safe position
         # Thumb: moderate yaw and pitch for gripping
         # Fingers: near maximum for full closure
-        positions = [1.0, 1.2, 1.4, 1.4, 1.4, 1.4]
+        positions = [0.8, 0.4, 1.4, 1.4, 1.4, 1.4]
         self.send_hand_command(positions)
 
     def test_pinch_gesture(self):
         """Test pinch gesture (thumb and index)"""
         # Thumb positioned for pinch, index closed, others open
-        positions = [0.8, 1.0, 1.2, 0.0, 0.0, 0.0]
+        positions = [1.3, 0.2, 0.8, 0.0, 0.0, 0.0]
         self.send_hand_command(positions)
 
     def test_finger_wave(self):
@@ -93,7 +93,7 @@ class HandPositionTest(Node):
     def test_partial_close(self):
         """Test partial closing of all fingers"""
         # Half-closed position for all joints
-        positions = [0.6, 0.8, 0.7, 0.7, 0.7, 0.7]
+        positions = [0.6, 0.4, 0.7, 0.7, 0.7, 0.7]
         self.send_hand_command(positions)
 
     def test_return_to_open(self):
