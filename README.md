@@ -15,6 +15,7 @@ ROS 2 package that provides launch files, controller configurations, robot descr
 
 ## Package layout
 - `launch/`: Launch files for different control modes
+- `setup/`: Setup scripts for configuring the CAN interface
 - `config/`: Controller and controller_manager YAML configurations
 - `urdf/`: Complete hand URDF descriptions (left and right)
 - `test/`: Example scripts for testing hand functionality
@@ -26,6 +27,17 @@ ROS 2 package that provides launch files, controller configurations, robot descr
 - `ruiyan_rh2_hand_description` package for hand description
 
 ## Launch Modes
+
+### Run the setup script
+If you are using a physical Ruiyan RH2 hand, run the setup script to configure the CAN interface:
+```bash
+cd ~/ros2_ws
+./install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/setup/ruiyan_rh2_init.sh
+```
+
+Then follow the instructions printed by the script.
+
+Please ensure that the CAN interface specified in the launch arguments matches the one configured by the setup script.
 
 ### Joint Position Control
 Provides direct joint position command interface:
@@ -39,15 +51,24 @@ Provides FollowJointTrajectory action interface for smooth trajectory execution:
 ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py
 ```
 
+### Hand Gripper Position Control
+Simplified control for opening/closing the hand:
+
+```bash
+ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_gripper_position_control.launch.py
+```
+
 ## Launch Arguments
 All launch files support the following arguments:
 - `use_mock_hardware`: Use mock hardware for testing (default: "false")
 - `hand_side`: Which hand to control: left or right (default: "left")
+- `can_interface`: CAN interface for hand communication (default: "can2")
+- `hand_speed`: Speed of hand motors (default: "1000")
 
 ### Examples
 ```bash
 # For right hand configuration
-ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py hand_side:=right
+ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py hand_side:=right can_interface:=can0
 
 # For simulation/testing without physical hand
 ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_position_control.launch.py use_mock_hardware:=true
@@ -103,19 +124,19 @@ Test different control modes manually:
 ros2 topic pub --once /ruiyan_rh2_hand_joint_position_controller/commands std_msgs/msg/Float64MultiArray "{data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
 
 # Close hand (typical grasp position)
-ros2 topic pub --once /ruiyan_rh2_hand_joint_position_controller/commands std_msgs/msg/Float64MultiArray "{data: [1.0, 1.2, 1.4, 1.4, 1.4, 1.4]}"
+ros2 topic pub --once /ruiyan_rh2_hand_joint_position_controller/commands std_msgs/msg/Float64MultiArray "{data: [0.8, 0.4, 1.4, 1.4, 1.4, 1.4]}"
 ```
 
 **Joint Trajectory Control:**
 ```bash
 ros2 action send_goal /ruiyan_rh2_hand_joint_trajectory_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory "{
   trajectory: {
-    joint_names: [thumb_yaw_joint, thumb_pitch_joint, index_proximal_joint, middle_proximal_joint, ring_proximal_joint, pinky_proximal_joint],
+    joint_names: [thumb_proximal_yaw_joint, thumb_proximal_pitch_joint, index_proximal_joint, middle_proximal_joint, ring_proximal_joint, pinky_proximal_joint],
     points: [
       { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 2 } },
-      { positions: [0.5, 0.2, 0.7, 0.7, 0.7, 0.7], time_from_start: { sec: 3 } },
-      { positions: [1.0, 0.4, 1.4, 1.4, 1.4, 1.4], time_from_start: { sec: 4 } },
-      { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 5 } }
+      { positions: [0.5, 0.2, 0.7, 0.7, 0.7, 0.7], time_from_start: { sec: 4 } },
+      { positions: [1.0, 0.4, 1.4, 1.4, 1.4, 1.4], time_from_start: { sec: 6 } },
+      { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 9 } }
     ]
   }
 }"
