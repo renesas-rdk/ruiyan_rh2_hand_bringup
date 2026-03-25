@@ -9,6 +9,8 @@ ROS 2 package that provides launch files, controller configurations, robot descr
 - Test scripts for validating hand functionality
 - Foxglove Studio configuration for visualization
 
+**Note:** Before using the RuiYan RH2 Dexhand, ensure that the hand is properly initialized using the provided setup script located in the ``ruiyan_rh2_hand_bringup/setup/ruiyan_rh2_init.sh`` or in the ``install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/setup/ruiyan_rh2_init.sh`` after installation.
+
 ## Related Packages
 - **ruiyan_rh2_hand_ros2_control**: Contains the hardware interface implementation
 - **ruiyan_rh2_hand_description**: Contains the hand's visual and collision meshes, joint definitions

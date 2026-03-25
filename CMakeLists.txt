@@ -10,6 +10,7 @@ install(
     config
     launch
     urdf
+    setup
     test
   DESTINATION share/${PROJECT_NAME}
 )
