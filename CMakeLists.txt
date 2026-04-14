@@ -10,8 +10,15 @@ install(
     config
     launch
     urdf
+    setup
     test
   DESTINATION share/${PROJECT_NAME}
+)
+
+# Install setup files
+install(PROGRAMS
+  setup/ruiyan_rh2_init.sh
+  DESTINATION share/${PROJECT_NAME}/setup
 )
 
 # Testing

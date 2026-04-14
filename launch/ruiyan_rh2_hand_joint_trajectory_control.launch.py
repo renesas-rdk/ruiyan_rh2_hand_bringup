@@ -28,8 +28,11 @@ This launch file starts:
 
 Usage:
   # For physical hand:
+  # Running the setup script to configure CAN interface before launching:
+  cd ~/ros2_ws
+  ./install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/setup/ruiyan_rh2_init.sh
   ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py
-  ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py hand_side:=right
+  ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py can_interface:=<can_interface> hand_speed:=<hand_speed>
 
   # For SIMULATION/TESTING without physical hand (RECOMMENDED for testing):
   ros2 launch ruiyan_rh2_hand_bringup ruiyan_rh2_hand_joint_trajectory_control.launch.py use_mock_hardware:=true
@@ -37,17 +40,17 @@ Usage:
   Then connect Foxglove Studio to ws://<foxglove_bridge_ip>:8765
 
 Test trajectory in another terminal with:
-  ros2 action send_goal /ruiyan_rh2_hand_joint_trajectory_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory "{
+    ros2 action send_goal /ruiyan_rh2_hand_joint_trajectory_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory "{
     trajectory: {
-      joint_names: [thumb_proximal_yaw_joint, thumb_proximal_pitch_joint, index_proximal_joint, middle_proximal_joint, ring_proximal_joint, pinky_proximal_joint],
-      points: [
+        joint_names: [thumb_proximal_yaw_joint, thumb_proximal_pitch_joint, index_proximal_joint, middle_proximal_joint, ring_proximal_joint, pinky_proximal_joint],
+        points: [
         { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 2 } },
-        { positions: [0.5, 0.2, 0.7, 0.7, 0.7, 0.7], time_from_start: { sec: 3 } },
-        { positions: [1.0, 0.4, 1.4, 1.4, 1.4, 1.4], time_from_start: { sec: 4 } },
-        { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 5 } }
-      ]
+        { positions: [0.5, 0.2, 0.7, 0.7, 0.7, 0.7], time_from_start: { sec: 4 } },
+        { positions: [1.0, 0.4, 1.4, 1.4, 1.4, 1.4], time_from_start: { sec: 6 } },
+        { positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], time_from_start: { sec: 9 } }
+        ]
     }
-  }"
+    }"
 
 Or run the Python test script:
   python3 ros2_ws/install/ruiyan_rh2_hand_bringup/share/ruiyan_rh2_hand_bringup/test/test_hand_trajectory.py
@@ -74,6 +77,8 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
     # Get launch configurations
     use_mock_hardware_value = LaunchConfiguration('use_mock_hardware').perform(context)
     hand_side_value = LaunchConfiguration('hand_side').perform(context)
+    can_interface_value = LaunchConfiguration('can_interface').perform(context)
+    hand_speed_value = LaunchConfiguration('hand_speed').perform(context)
 
     # Get package directories
     pkg_share = get_package_share_directory('ruiyan_rh2_hand_bringup')
@@ -92,7 +97,9 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
     robot_description_raw = xacro.process_file(
         robot_description_xacro,
         mappings={
-            'use_mock_hardware': use_mock_hardware_value
+            'use_mock_hardware': use_mock_hardware_value,
+            'can_interface': can_interface_value,
+            'hand_speed': hand_speed_value,
         }
     ).toxml()
 
@@ -161,7 +168,7 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
         # Foxglove bridge for web-based visualization
         IncludeLaunchDescription(
             FrontendLaunchDescriptionSource(foxglove_bridge_launch)
-        )
+        ),
     ]
 
     return nodes
@@ -169,21 +176,26 @@ def launch_setup(context, *args, **kwargs) -> List[Node]:
 
 def generate_launch_description() -> LaunchDescription:
     """Generate launch description for Ruiyan RH2 Hand with joint trajectory control."""
-    # Declare arguments
-    use_mock_hardware_arg = DeclareLaunchArgument(
-        'use_mock_hardware',
-        default_value='false',
-        description='Use mock hardware for testing (true/false)'
-    )
-
-    hand_side_arg = DeclareLaunchArgument(
-        'hand_side',
-        default_value='left',
-        description='Which hand to control: left or right'
-    )
-
     return LaunchDescription([
-        use_mock_hardware_arg,
-        hand_side_arg,
-        OpaqueFunction(function=launch_setup)
+        DeclareLaunchArgument(
+            'use_mock_hardware',
+            default_value='false',
+            description='Use mock hardware for testing (true/false)'
+        ),
+        DeclareLaunchArgument(
+            'hand_side',
+            default_value='left',
+            description='Which hand to control: left or right'
+        ),
+        DeclareLaunchArgument(
+            'can_interface',
+            default_value='can2',
+            description='CAN interface for hand hardware communication (e.g., can0, can1, can2)'
+        ),
+        DeclareLaunchArgument(
+            'hand_speed',
+            default_value='1500',
+            description='Hand motor speed (range: 0-1000, higher is faster)'
+        ),
+        OpaqueFunction(function=launch_setup),
     ])

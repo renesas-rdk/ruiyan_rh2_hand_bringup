@@ -96,19 +96,19 @@ class HandTrajectoryTest(Node):
     def close_hand(self):
         """Close all fingers"""
         # All fingers closed to maximum safe position for proper closing
-        positions = [1.0, 1.2, 1.4, 1.4, 1.4, 1.4]
+        positions = [0.8, 0.4, 1.4, 1.4, 1.4, 1.4]
         self.send_trajectory(positions)
 
     def pinch_gesture(self):
         """Pinch gesture - thumb and index finger"""
         # Better thumb positioning for pinch
-        positions = [0.8, 1.0, 1.2, 0.0, 0.0, 0.0]
+        positions = [1.3, 0.2, 0.8, 0.0, 0.0, 0.0]
         self.send_trajectory(positions)
 
     def point_gesture(self):
         """Pointing gesture - index finger extended"""
         # Close all but index finger
-        positions = [0.5, 0.8, 0.0, 1.2, 1.2, 1.2]
+        positions = [0.5, 0.4, 0.0, 1.2, 1.2, 1.2]
         self.send_trajectory(positions)
 
     def wave_gesture(self):
