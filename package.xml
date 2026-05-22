@@ -29,9 +29,13 @@
   <exec_depend>xacro</exec_depend>
   <exec_depend>ruiyan_rh2_hand_description</exec_depend>
 
+  <!-- Utility nodes -->
+  <exec_depend>dexhand_utils</exec_depend>
+
   <!-- Launch file dependencies -->
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>foxglove_bridge</exec_depend>
 
   <!-- Python dependencies for test -->
   <exec_depend>rclpy</exec_depend>
